@@ -36,7 +36,7 @@ class ConvertFromRUB(Resource):
             abort(400, message=f"Unknown currency code: {to_code!r}")
         return {
             "value": Decimal(quantity) / (rate.nominal * rate.value),
-            "code": "RUB",
+            "code": to_code,
         }
 
 
