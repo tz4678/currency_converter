@@ -48,14 +48,14 @@ def create_app() -> Flask:
     api.init_app(app)
     sched.init_app(app)
     sched.start()
-    # запускаем задание при старте и в 00:00
+    # запускаем задание при старте и в 00:00:59
     sched.add_job(
         fetch_exchange_rate.__name__,
         fetch_exchange_rate,
         trigger="cron",
         hour=0,
         minute=0,
-        second=0,
+        second=59,
         replace_existing=True,
         max_instances=1,
         next_run_time=datetime.datetime.now(),
