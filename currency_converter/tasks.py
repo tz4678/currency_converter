@@ -9,7 +9,7 @@ from sqlalchemy.dialects import postgresql
 def fetch_exchange_rate() -> None:
     app = sched.app
     with app.app_context():
-        for _ in range(3, 0, -1):
+        while True:
             try:
                 r = requests.get("https://www.cbr.ru/scripts/XML_daily.asp")
                 r.raise_for_status()
@@ -36,5 +36,5 @@ def fetch_exchange_rate() -> None:
                 app.logger.debug(stmt.compile(dialect=postgresql.dialect()))
                 db.session.execute(stmt)
                 break
-            except requests.exceptions.HTTPError as e:
+            except Exception as e:
                 app.logger.exception(e)
