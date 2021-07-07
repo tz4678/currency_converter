@@ -29,7 +29,7 @@ Date: Tue, 06 Jul 2021 20:40:04 GMT
 Server: Werkzeug/2.0.1 Python/3.9.6
 
 {
-    "code": "USB",
+    "code": "USD",
     "value": 136.4889580432943
 }
 
