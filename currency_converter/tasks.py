@@ -14,23 +14,21 @@ def fetch_exchange_rate() -> None:
                 r = requests.get("https://www.cbr.ru/scripts/XML_daily.asp")
                 r.raise_for_status()
                 bs = BeautifulSoup(r.text, "lxml")
-                values = []
+                rates = []
                 for v in bs.find_all("valute"):
                     code = v.find("charcode").text
-                    name = v.find("name").text
-                    nominal = v.find("nominal").text
-                    value = v.find("value").text.replace(",", ".")
-                    values.append(
-                        dict(code=code, name=name, nominal=nominal, value=value)
+                    # name = v.find("name").text
+                    nominal = int(v.find("nominal").text)
+                    value = (
+                        float(v.find("value").text.replace(",", ".")) / nominal
                     )
-                app.logger.debug(values)
-                stmt = insert(ExchangeRate).values(values)
+                    rates.append(dict(code=code, value=value))
+                app.logger.debug(rates)
+                stmt = insert(ExchangeRate).values(rates)
                 stmt = stmt.on_conflict_do_update(
                     constraint="exchange_rate_code_key",
                     set_={
                         "value": stmt.excluded.value,
-                        "nominal": stmt.excluded.nominal,
-                        "name": stmt.excluded.name,
                     },
                 )
                 app.logger.debug(stmt.compile(dialect=postgresql.dialect()))

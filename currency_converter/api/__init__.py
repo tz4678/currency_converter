@@ -1,4 +1,4 @@
-from flask_restful import Resource, Api, abort
+from flask_restful import Resource, Api, abort, reqparse
 from ..models import ExchangeRate, ExchangeRateSchema
 from decimal import Decimal
 
@@ -18,28 +18,24 @@ class ExchangeRateList(Resource):
         return ExchangeRateSchema().dump(data, many=True)
 
 
-class ConvertToRUB(Resource):
-    def get(self, from_code: str, quantity: float) -> dict[str, float]:
-        if (
-            rate := ExchangeRate.query.filter_by(code=from_code).first()
-        ) is None:
-            abort(400, message=f"Unknown currency code: {from_code!r}")
-        return {
-            "value": Decimal(quantity) / rate.nominal * rate.value,
-            "code": "RUB",
-        }
+class Converter(Resource):
+    def get(self, code: str, quantity: str) -> dict[str, float]:
+        if (rate := ExchangeRate.query.filter_by(code=code).first()) is None:
+            abort(400, message=f"Unknown currency code: {code!r}")
 
+        parser = reqparse.RequestParser()
+        parser.add_argument("from", default=False, type=bool)
+        args = parser.parse_args()
+        print(args)
 
-class ConvertFromRUB(Resource):
-    def get(self, to_code: str, quantity: float) -> dict[str, float]:
-        if (rate := ExchangeRate.query.filter_by(code=to_code).first()) is None:
-            abort(400, message=f"Unknown currency code: {to_code!r}")
-        return {
-            "value": Decimal(quantity) / (rate.nominal * rate.value),
-            "code": to_code,
-        }
+        quantity = float(quantity)
+
+        return (
+            {"value": quantity * rate.value, "code": "RUB"}
+            if args["from"]
+            else {"value": quantity / rate.value, "code": code}
+        )
 
 
 api.add_resource(ExchangeRateList, "/rates")
-api.add_resource(ConvertToRUB, "/convert/<from_code>/RUB/<quantity>")
-api.add_resource(ConvertFromRUB, "/convert/RUB/<to_code>/<quantity>")
+api.add_resource(Converter, "/convert/<code>/<quantity>")

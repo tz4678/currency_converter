@@ -15,7 +15,7 @@ from .utils import CustomJsonEncoder
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "postgresql://docker:docker@192.168.0.104:5432/converter_db",
+        "postgresql://docker:secret@192.168.0.104:5432/converter_db",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SCHEDULER_API_ENABLED = True
