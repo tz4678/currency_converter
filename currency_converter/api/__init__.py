@@ -26,7 +26,6 @@ class Converter(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("from", default=False, type=bool)
         args = parser.parse_args()
-        print(args)
 
         quantity = float(quantity)
 
